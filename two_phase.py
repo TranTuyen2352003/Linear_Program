@@ -168,12 +168,12 @@ def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions)
     result_strings = []
     print("Thỏa mãn các ràng buộc sau:")
 
-    for i in range(n):
+    for i in range(int(n)):
         new_constraint = ""
         new_constraint_1 = ""
         temp_constraint = []
 
-        for j in range(m):
+        for j in range(int(m)):
             if conditions[j] == "<= 0":
                 temp_constraint.append(-a[i][j])  # Đảo dấu của hệ số
                 if -a[i][j] > 0 and -a[i][j] != a[i][0]:
@@ -216,7 +216,7 @@ def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions)
             new_constraint_1 += f" <= {-b[i]}"
             new_b.append(-b[i])
             new_constraint = ""
-            for j in range(m):
+            for j in range(int(m)):
                 if conditions[j] == "<= 0":
                     new_constraint += f" {temp_constraint[j]}x{j+1}"
                 elif conditions[j] == "tùy ý":
