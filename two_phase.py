@@ -241,10 +241,128 @@ def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions)
     new_a = [row for row in new_a if len(row) == len(new_c)]
     return new_a, new_b, new_c, len(new_b), len(new_c), new_conditions
 
+def convert_to_equations(a, b, c, n, m, conditions):
+    print("Lập từ vựng xuất phát:")
+    print("z =", end=" ")
+    first_arbitrary_variable = -1
+    # Khởi tạo hàm mục tiêu dựa trên conditions
+    for k in range(len(c)):
+        # Nếu biến hiện tại là biến tùy ý
+        if conditions[k] == "tùy ý":
+            if first_arbitrary_variable == -1:  # Nếu đây là biến tùy ý đầu tiên
+                first_arbitrary_variable = k
+                print(f"{c[k]}*x{k+1}", end=" ")
+                if k + 1 < len(conditions) and conditions[k + 1] == "tùy ý":  # Kiểm tra xem cặp hiện tại có chứa điều kiện "tùy ý" không
+                    temp = first_arbitrary_variable % 2
+                    if (k + 1) % 2 == temp:  # Kiểm tra vị trí của biến tùy ý
+                        print(f" + {c[k]}*x{k+1}", end=" ")
+                    else:
+                        print(f" - {c[k]}*x{k+1}_t", end=" ")
+        elif k == 0:
+            print(f"{c[k]}*x{k+1}", end=" ")
+        else:
+            print(f"{c[k]}*x{k}", end=" ")
+        
+        if k < len(c) - 1:
+            print("+", end=" ")
+    
+    print()
+    equations = []
+    
+    for i in range(len(a)):
+        first_arbitrary_variable = -1
+        if i < len(b):
+            equation = f"w{i+1} = {b[i]}"
+            for j in range(len(a[i])):
+                if a[i][j] != 0:
+                    if conditions[j] == "tùy ý":
+                        # Kiểm tra xem cặp hiện tại có chứa điều kiện "tùy ý" không
+                        if first_arbitrary_variable == -1:  # Nếu đây là biến tùy ý đầu tiên
+                            first_arbitrary_variable = j                     
+                            equation += f" {'-' if a[i][j] > 0 else '+'} {abs(a[i][j])}x{j+1}"
+                            if j + 1 < len(conditions) and conditions[j + 1] == "tùy ý":
+                                temp = first_arbitrary_variable % 2
+                                if (k + 1) % 2 == temp:  # Kiểm tra vị trí của biến tùy ý
+                                   equation += f" {'-' if a[i][j] > 0 else '+'} {abs(a[i][j])}x{j+1}"
+                                
+                                else:
+                                   equation += f" {'-' if a[i][j] > 0 else '+'} {abs(a[i][j])}x{j+1}_t"
+                    elif j == 0:
+                        equation += f" {'-' if a[i][j] > 0 else '+'} {abs(a[i][j])}x{j+1}"
+                    else:
+                        equation += f" {'-' if a[i][j] > 0 else '+'} {abs(a[i][j])}x{j}"
+            equations.append(equation)
+    
+    # In ra các phương trình đã được chuyển đổi
+    for equation in equations:
+        print(equation)
+    print("---------------------------------------------")
+def convert_to_phase1_form_x0(a, b, c, n, m):
+    # Thêm biến phụ x0 vào hàm mục tiêu với hệ số là 1
+    c = [0.0] * m + [1.0] + [0.0] * n
+    
+    # Tạo bảng đơn hình
+    tableau = []
+    variables = ['x{}'.format(i + 1) for i in range(m)] + ['w{}'.format(i + 1) for i in range(n)] + ['x0'] + ['const.']
+
+    # Thêm hàng cho mỗi ràng buộc và biến cơ sở
+    for i in range(int(n)):
+        slack_variables = [0] * (n + m + 1)
+        slack_variables[m + i] = 1.0
+        tableau_row = [-x for x in a[i]] + slack_variables[:n + m] + [b[i]]
+        tableau.append(tableau_row)
+
+    # Thêm hàng cho ràng buộc -x0
+    tableau_row_x0 = [0.0] * (m + n) + [-1.0] + [0.0] * (n + 1)
+    tableau.append(tableau_row_x0)
+
+    # Thêm hàng cho hàm mục tiêu
+    final_row = [-x for x in c] + [0] * (n + 1)
+    tableau.insert(0, final_row)
+    return tableau, m + n + 1  # Trả về bảng và số lượng biến mới (bao gồm cả x0 và w)w)
+
+def convert_to_equations_x0(a, b, c, n, m, conditions):
+    print("Lập từ vựng xuất phát:")
+    def print_objective_function():
+        print("E =", end=" ")
+        for i in range(int(m -1)):
+            if conditions[i] == "tùy ý":
+                print(f"{c[i]}*x{i+1} - {c[i]}*x{i+1}_t", end=" ")
+            else:
+                print(f"{c[i]}*x{i+1}", end=" ")
+            if i < m - 1:
+                print("+", end=" ")
+        print("+ x0")  # Thêm biến x0 vào hàm mục tiêu
+
+    print_objective_function()
+
+    equations = []
+    for i in range(len(a)):
+     equation = f"w{i+1} = {b[i]}"
+     for j in range(len(a[i])):
+        if a[i][j] != 0:
+            if j == 0 or j == 1:
+                if conditions[j] == "tùy ý":
+                    equation += f" {'-' if a[i][j] > 0 else '+'} {abs(a[i][j])}x{j+1} - {abs(a[i][j])}x{j+1}_t"
+                else:
+                    equation += f" {'-' if a[i][j] > 0 else '+'} {abs(a[i][j])}x{j+1}"
+            else:
+                if conditions[j] == "tùy ý":
+                    equation += f" {'-' if a[i][j] > 0 else '+'} {abs(a[i][j])}x{j} - {abs(a[i][j])}x{j}_t"
+                else:
+                    equation += f" {'-' if a[i][j] > 0 else '+'} {abs(a[i][j])}x{j}"
+     equation += f" + 1*x0"  # Thêm biến x0 vào phương trình và ràng buộc
+     equations.append(equation)
+
+    # In ra các phương trình đã được chuyển đổi
+    for equation in equations:
+        print(equation)
+    print("---------------------------------------------")
+
 def CreateTableau_x0(a, b, c, n, m):
     tableau = []
     c = [0.0] * m  + [0.0] * n +  [1.0]
-    for i in range(n):
+    for i in range(int(n)):
         slack_variables = [0] * n
         slack_variables[i] = 1.0
         tableau_row = [-x for x in a[i]] + slack_variables + [1] + [b[i]]  # Chỉnh sửa giá trị của cột x0 thành 1
@@ -282,7 +400,7 @@ def print_tableau_x0(tableau, m, n, conditions):
 
 
     # Thêm các biến slack vào danh sách biến
-    for i in range(n):
+    for i in range(int(n)):
         variables.append('w{}'.format(i + 1))
     # Thêm biến x0 vào danh sách biến
     variables.append('x0')
@@ -349,7 +467,7 @@ def ProcessPivotElement_x0(tableau, pivot_element):
 
 def CreateTableau(a, b, c, n, m):
     tableau = []
-    for i in range(n):
+    for i in range(int(n)):
         slack_variables = [0] * n
         slack_variables[i] = 1.0
         tableau_row = [-x for x in a[i]] + slack_variables + [b[i]]
@@ -367,7 +485,7 @@ def print_tableau(tableau, n, m, conditions):
     variables = []
     variable_index = 1
     is_last_arbitrary = False
-    for i in range(m):
+    for i in range(int(m)):
         if conditions[i] == "tùy ý":
             if not is_last_arbitrary:
                 variables.append('x{}'.format(variable_index))
@@ -382,7 +500,7 @@ def print_tableau(tableau, n, m, conditions):
             is_last_arbitrary = False
 
     # Thêm các biến w và hằng số vào danh sách biến
-    for i in range(n):
+    for i in range(int(n)):
         variables.append('w{}'.format(i + 1))
     variables.append('const.')
     
