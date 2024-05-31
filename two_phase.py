@@ -16,16 +16,31 @@ class Position:
         self.column = column
 
 def ReadEquation():
-    n, m = map(int, st.text_input("Nhập số lượng ràng buộc (n) và biến (m), cách nhau bằng dấu cách:").split())
+    # Nhập số lượng ràng buộc (n) và biến (m)
+    n = st.number_input("Nhập số lượng ràng buộc (n):", min_value=1, step=1)
+    m = st.number_input("Nhập số lượng biến (m):", min_value=1, step=1)
+    
+    # Nhập hệ số của các biến trong các ràng buộc
     a = []
-    for row in range(n):
-        row_input = st.text_input(f"Nhập hệ số của các biến trong ràng buộc thứ {row + 1}, cách nhau bằng dấu cách:")
-        a.append(list(map(float, row_input.split())))
-    b_input = st.text_input("Nhập hệ số sau toán tử ràng buộc, cách nhau bằng dấu cách:")
-    c_input = st.text_input("Nhập hệ số của hàm mục tiêu, cách nhau bằng dấu cách:")
-    b = list(map(float, b_input.split()))
-    c = list(map(float, c_input.split()))
-    return a, b, c, n, m
+    st.write("Nhập hệ số của các biến trong các ràng buộc, cách nhau bằng dấu cách:")
+    for row in range(int(n)):
+        row_input = st.text_input(f"Ràng buộc {row + 1}:", key=f"constraint_{row}")
+        if row_input:
+            a.append(list(map(float, row_input.split())))
+    
+    # Nhập hệ số sau toán tử ràng buộc
+    b_input = st.text_area("Nhập hệ số sau toán tử ràng buộc, cách nhau bằng dấu cách:")
+    b = list(map(float, b_input.split())) if b_input else []
+
+    # Nhập hệ số của hàm mục tiêu
+    c_input = st.text_area("Nhập hệ số của hàm mục tiêu, cách nhau bằng dấu cách:")
+    c = list(map(float, c_input.split())) if c_input else []
+
+    # Kiểm tra đầu vào
+    if len(a) != n or any(len(row) != m for row in a) or len(b) != n or len(c) != m:
+        st.error("Vui lòng nhập đúng số lượng ràng buộc và hệ số.")
+    else:
+        return a, b, c, n, m
 
 def InputObjectiveFunction():
     m = st.number_input("Nhập số lượng biến của hàm mục tiêu: ")
