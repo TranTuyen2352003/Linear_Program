@@ -205,6 +205,7 @@ def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions)
     # Xóa các dòng trong a có số lượng phần tử khác với new_m
     new_a = [row for row in new_a if len(row) == len(new_c)]
     return new_a, new_b, new_c, len(new_b), len(new_c), new_conditions
+    
 def convert_to_equations(a, b, c, n, m, conditions):
     print("Lập từ vựng xuất phát:")
     print("z =", end=" ")
