@@ -123,12 +123,6 @@ def PrintConstraints(a, operators, b, conditions):
     print("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
 
 def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions):
-    # Kiểm tra đầu vào hợp lệ
-    if not isinstance(n, int) or n <= 0:
-        st.error("Số lượng ràng buộc 'n' phải là một số nguyên dương.")
-    if not isinstance(m, int) or m <= 0:
-        st.error("Số lượng biến 'm' phải là một số nguyên dương.")
-
     print("Bài toán sau khi chuyển đổi:")
     new_c = []
     new_a = []
